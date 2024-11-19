@@ -16,12 +16,16 @@ app.get("/main", (req, res)=>{
 })
 
 app.get("/gallery", (req, res)=>{
-  console.log(req.query)
-  const queryTerm = req.query.query
-  const category = req.query.category
-
-  // res.send(`Search Query: ${queryTerm}, Category: ${category}`);
-  res.render('gallery', { renderQuery: queryTerm, renderCategory:category});
+  // console.log(req.query)
+  const queryTerm = req.query.query;
+  const category = req.query.category;
+  console.log("this is the queryTerm: ",queryTerm);
+  console.log("this is the category: ", category);
+  if (queryTerm == "" && category == ""){
+    console.log(queryTerm, "--->''",category, "---> ''")
+  }else{
+    res.render('gallery', { renderQuery: queryTerm, renderCategory:category});
+  }
 })
 
 app.get("/create", (req, res)=>{
