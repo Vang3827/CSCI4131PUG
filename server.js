@@ -41,15 +41,7 @@ const listings = [
   }
 ];
 
-// function iterateObj(obj) {
-//   for (key in obj) {
-//     if (typeof obj[key] === "object" && obj[key] !== null) {
-//       iterateObj(obj[key]);
-//     } else {
-//       console.log(key + ":", obj[key])
-//     }
-//   }
-// }
+
 app.use("/css", express.static("css/"))
 app.set("views", "templates");
 app.set("view engine", "pug");
@@ -74,18 +66,6 @@ app.get("/gallery", (req, res) => {
     res.render('gallery', { renderQuery: queryTerm, renderCategory: category });
   } else {
     console.log("render gallery without query");
-
-    
-    // function iterateObj(obj) {
-    //   for (key in obj) {
-    //     if (typeof obj[key] === "object" && obj[key] !== null) {
-    //       iterateObj(obj[key]);
-    //     } else {
-    //       console.log(key + ":", obj[key])
-    //     }
-    //   }
-    // }
-    // iterateObj(listings);
 
     res.render('gallery' ,{listings});
   }
