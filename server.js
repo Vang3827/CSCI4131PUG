@@ -78,12 +78,14 @@ app.get("/gallery", (req, res) => {
       categoryLower = listings[listing].category.toLowerCase()
       console.log("Vehicle listing --> ", vechicleLower);
       console.log("Catagory lower ---> ", categoryLower);
+      console.log("This: ", categoryLower, " That: ",lowerCategory)
       if(vechicleLower.includes(lowerQuery)){
         console.log("in for loop");
         // console.log(listings[listing].vehicle)
         console.log(vechicleLower,"==",lowerQuery);
         
       } else if(categoryLower.includes(lowerCategory)){
+        console.log("In else loop for Category")
         console.log(categoryLower,"==", category);
       }
     }
