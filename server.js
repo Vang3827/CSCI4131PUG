@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const pug = require('pug');
 
 const listings = [
   {
@@ -42,7 +43,8 @@ const listings = [
 ];
 
 
-app.use("/css", express.static("css/"))
+app.use("/css", express.static("resources/css/"))
+app.use("/js", express.static("resources/js/"))
 app.set("views", "templates");
 app.set("view engine", "pug");
 
@@ -63,12 +65,46 @@ app.get("/gallery", (req, res) => {
     const category = req.query.category;
     console.log("this is the queryTerm: ", queryTerm);
     console.log("this is the category: ", category);
-    res.render('gallery', { renderQuery: queryTerm, renderCategory: category });
+
+    // if (Object.values(listings).includes(queryTerm) || Object.values(listings).includes(category)){
+    //   console.log("query or category match");
+    //   console.log("QueryTerm == ", queryTerm, " , ", "category == ",category);
+    // }
+    const pugTemplate = `
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet' href='css/main.css')
+  title Auto Auction
+  script(defer='' src='js/table.js')
+form.topnav(action='gallery' method='get')
+  a(href='/') About
+  a(href='/gallery') Gallery
+  input(name='query' type='search' placeholder='Search..')
+  select#cars(name='category')
+    option None
+    option(value='coupe') Coupe
+    option(value='truck') Truck
+    option(value='suv') SUV
+  input(type='submit' value='Submit')
+h1.listingh Auto Auction list
+  `;
+    const renderPug = pug.render(pugTemplate)
+    res.send(renderPug)
+    
+
+    // res.render('gallery', { renderQuery: queryTerm, renderCategory: category });
   } else {
     console.log("render gallery without query");
 
     res.render('gallery' ,{listings});
   }
+})
+
+app.get("/listing", (req,res) => {
+
+
 })
 
 app.get("/create", (req, res) => {

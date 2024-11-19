@@ -4,7 +4,7 @@ head
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet' href='css/main.css')
   title Auto Auction
-  script(defer='' src='/table.js')
+  script(defer='' src='js/table.js')
 form.topnav(action='gallery' method='get')
   a(href='/') About
   a(href='/gallery') Gallery
@@ -27,18 +27,21 @@ p= renderCategory
             th Top Bid
             th Auction Ends
         each listing in listings
-            - let urlLink = "/listing/"+listing.numericID
+            - let urlListingID = "/listing/"+listing.numericID
+            - let timerId = "timerid"+listing.numericID
             - let numOfBids = listing.bids.length
+            - let imgData = "imgData"+listing.numericID
             - let maxBids = 0
             each bid in listing.bids 
                 - maxBids = Math.max(bid.bidAmount)
 
             tr#tableRow.box
-                td#imgData1(data-image=listing.url)
-                    a(href= urlLink) #{listing.vehicle}
+                td(id=imgData)(data-image=listing.url)
+                    a(href= urlListingID) #{listing.vehicle}
                 td #{numOfBids}
                 td $ #{maxBids}
-                td(id = 'timerid')
-                    input#delete.bidButton(data-id="" type ='button' value='delete')  
+                td(id = timerId) #{listing.date}
+                td 
+                  input#delete.bidButton(data-id=listing.numericID type ='button' value='delete')  
   #imgPreview.sideOfTable
 
