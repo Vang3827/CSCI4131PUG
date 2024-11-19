@@ -2,7 +2,7 @@ doctype html
 head
   meta(charset='UTF-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet' href='/main.css')
+  link(rel='stylesheet' href='css/main.css')
   title Auto Auction
   script(defer='' src='/table.js')
 form.topnav(action='gallery' method='get')
@@ -16,13 +16,29 @@ form.topnav(action='gallery' method='get')
     option(value='suv') SUV
   input(type='submit' value='Submit')
 h1.listingh Auto Auction list
+p= renderQuery
+p= renderCategory
 .listingColumn
   .tableContainer
     table(border='1')
-      tr
-        th Listing
-        th Number of Bids
-        th Top Bid
-        th Auction Ends
-      |                         {tablestr}
+        tr
+            th Listing
+            th Number of Bids
+            th Top Bid
+            th Auction Ends
+        each listing in listings
+            - let urlLink = "/listing/"+listing.numericID
+            - let numOfBids = listing.bids.length
+            - let maxBids = 0
+            each bid in listing.bids 
+                - maxBids = Math.max(bid.bidAmount)
+
+            tr#tableRow.box
+                td#imgData1(data-image=listing.url)
+                    a(href= urlLink) #{listing.vehicle}
+                td #{numOfBids}
+                td $ #{maxBids}
+                td(id = 'timerid')
+                    input#delete.bidButton(data-id="" type ='button' value='delete')  
   #imgPreview.sideOfTable
+
