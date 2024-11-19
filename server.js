@@ -60,16 +60,34 @@ app.get("/main", (req, res) => {
 
 app.get("/gallery", (req, res) => {
   // console.log(req.query)
+  // console.log(Object.values(listings).includes("Toyota"))
+  // console.log(listings)
+
   if (Object.keys(req.query).length > 0) {
     const queryTerm = req.query.query;
     const category = req.query.category;
-    console.log("this is the queryTerm: ", queryTerm);
-    console.log("this is the category: ", category);
+    console.log("this is the queryTerm:",queryTerm);
+    console.log("this is the category:",category);
+    const lowerQuery = queryTerm.toLowerCase();
+    const lowerCategory = category.toLowerCase();
+    console.log("Lowercase: ", lowerQuery);
+    // console.log("Lowercase Category", )
+    //checking values
+    for (let listing in listings){
+      vechicleLower = listings[listing].vehicle.toLowerCase()
+      categoryLower = listings[listing].category.toLowerCase()
+      console.log("Vehicle listing --> ", vechicleLower);
+      console.log("Catagory lower ---> ", categoryLower);
+      if(vechicleLower.includes(lowerQuery)){
+        console.log("in for loop");
+        // console.log(listings[listing].vehicle)
+        console.log(vechicleLower,"==",lowerQuery);
+        
+      } else if(categoryLower.includes(lowerCategory)){
+        console.log(categoryLower,"==", category);
+      }
+    }
 
-    // if (Object.values(listings).includes(queryTerm) || Object.values(listings).includes(category)){
-    //   console.log("query or category match");
-    //   console.log("QueryTerm == ", queryTerm, " , ", "category == ",category);
-    // }
     const pugTemplate = `
 doctype html
 head
