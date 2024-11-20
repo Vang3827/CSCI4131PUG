@@ -7,7 +7,7 @@ const listings = [
     vehicle: "Dodge Challenger",
     url: "https://images.unsplash.com/photo-1632686341369-8a7991237930?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     description: "Longer text for descrption",
-    category: "small",
+    category: "coupe",
     numericID: 1,
     date: "08/20/2024",
     bids: [
@@ -19,7 +19,7 @@ const listings = [
     vehicle: "Ford Mustang",
     url: "https://images.unsplash.com/photo-1610378985708-ac6de045f9f3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     description: "Longer text for descrption",
-    category: "small",
+    category: "coupe",
     numericID: 2,
     date: "09/15/2024",
     bids: [
@@ -59,70 +59,43 @@ app.get("/main", (req, res) => {
 })
 
 app.get("/gallery", (req, res) => {
-  // console.log(req.query)
-  // console.log(Object.values(listings).includes("Toyota"))
-  // console.log(listings)
+
 
   if (Object.keys(req.query).length > 0) {
     const queryTerm = req.query.query;
     const category = req.query.category;
-    console.log("this is the queryTerm:",queryTerm);
-    console.log("this is the category:",category);
+    tempListing = []
+
     const lowerQuery = queryTerm.toLowerCase();
     const lowerCategory = category.toLowerCase();
-    console.log("Lowercase: ", lowerQuery);
-    // console.log("Lowercase Category", )
-    //checking values
-    for (let listing in listings){
+    console.log("LowerCase Query: ",lowerQuery, "type of: ", typeof lowerQuery)
+    console.log("LowerCase Category: ",lowerCategory, "type of: ",typeof lowerCategory)
+
+    for (let listing in listings) {
       vechicleLower = listings[listing].vehicle.toLowerCase()
       categoryLower = listings[listing].category.toLowerCase()
-      console.log("Vehicle listing --> ", vechicleLower);
-      console.log("Catagory lower ---> ", categoryLower);
-      console.log("This: ", categoryLower, " That: ",lowerCategory)
-      if(vechicleLower.includes(lowerQuery)){
+
+
+      if (vechicleLower.includes(lowerQuery) && categoryLower.includes(lowerCategory)) {
         console.log("in for loop");
-        // console.log(listings[listing].vehicle)
-        console.log(vechicleLower,"==",lowerQuery);
-        
-      } else if(categoryLower.includes(lowerCategory)){
-        console.log("In else loop for Category")
-        console.log(categoryLower,"==", category);
-      }
+        console.log(vechicleLower, "==", lowerQuery);
+        console.log(categoryLower, "==", lowerCategory);
+        // console.log("Pushing this: ",listing)
+        tempListing.push(listings[listing]);
+      } 
+
     }
+    console.log(tempListing);
+    res.render('gallery', { tempListing });
 
-    const pugTemplate = `
-doctype html
-head
-  meta(charset='UTF-8')
-  meta(name='viewport' content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet' href='css/main.css')
-  title Auto Auction
-  script(defer='' src='js/table.js')
-form.topnav(action='gallery' method='get')
-  a(href='/') About
-  a(href='/gallery') Gallery
-  input(name='query' type='search' placeholder='Search..')
-  select#cars(name='category')
-    option None
-    option(value='coupe') Coupe
-    option(value='truck') Truck
-    option(value='suv') SUV
-  input(type='submit' value='Submit')
-h1.listingh Auto Auction list
-  `;
-    const renderPug = pug.render(pugTemplate)
-    res.send(renderPug)
-    
-
-    // res.render('gallery', { renderQuery: queryTerm, renderCategory: category });
   } else {
     console.log("render gallery without query");
-
-    res.render('gallery' ,{listings});
+    let tempListing = listings
+    res.render('gallery', { tempListing });
   }
 })
 
-app.get("/listing", (req,res) => {
+app.get("/listing", (req, res) => {
 
 
 })

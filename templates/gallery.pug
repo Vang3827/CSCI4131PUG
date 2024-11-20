@@ -8,16 +8,16 @@ head
 form.topnav(action='gallery' method='get')
   a(href='/') About
   a(href='/gallery') Gallery
-  input(name='query' type='search' placeholder='Search..')
-  select#cars(name='category')
-    option None
-    option(value='coupe') Coupe
-    option(value='truck') Truck
-    option(value='suv') SUV
-  input(type='submit' value='Submit')
+  a(href='/create') Add Listing
+  div
+    input(name='query' type='search' placeholder='Search..')
+    select#cars(name='category')
+      option(value='') None
+      option(value='coupe') Coupe
+      option(value='truck') Truck
+      option(value='suv') SUV
+    input(type='submit' value='Submit')
 h1.listingh Auto Auction list
-p= renderQuery
-p= renderCategory
 .listingColumn
   .tableContainer
     table(border='1')
@@ -26,7 +26,7 @@ p= renderCategory
             th Number of Bids
             th Top Bid
             th Auction Ends
-        each listing in listings
+        each listing in tempListing
             - let urlListingID = "/listing/"+listing.numericID
             - let timerId = "timerid"+listing.numericID
             - let numOfBids = listing.bids.length
