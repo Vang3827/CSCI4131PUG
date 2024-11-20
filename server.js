@@ -42,8 +42,8 @@ const listings = [
   }
 ];
 
-
-app.use("/css", express.static("resources/css/"))
+app.use(express.urlencoded({ extended: true }));
+app.use('/resources', express.static('resources'));
 app.use("/js", express.static("resources/js/"))
 app.set("views", "templates");
 app.set("view engine", "pug");
@@ -95,21 +95,95 @@ app.get("/gallery", (req, res) => {
   }
 })
 
-app.get("/listing", (req, res) => {
+app.get('/listing/:id', (req, res) => {
+  const listingId = parseInt(req.params.id);
+  const listing = listings.find(l => l.numericID === listingId);
+
+  if (!listing) {
+    return res.status(404).render('404.pug'); // 404 page if listing is not found
+  }
+
+  res.render('listing.pug', { listing: listing });
+});
 
 
-})
+
 
 app.get("/create", (req, res) => {
   res.render("create.pug", (req, res))
 })
 
-app.post("/create", (req, res) => {
-  res.render("create.pug", (req, res))
-})
+app.post('/create', (req, res) => {
+  const { listingTitle, imgInput, textA, carsCat, date } = req.body;
 
-//app.get("listing/[id]") returns a html rendered verion of templates/listing.pug responds to a query and category
-//res.render ??
+  // Basic validation
+  if (!listingTitle || !imgInput || !textA || !carsCat || !date) {
+    return res.status(400).render('error', { message: 'All fields are required!' });
+  }
+
+  // Create new listing
+  const newListing = {
+    vehicle: listingTitle,
+    url: imgInput,
+    description: textA,
+    category: carsCat,
+    numericID: listings.length + 1,  // Increment the numericID
+    date: date,
+    bids: []
+  };
+
+  // Add new listing to internal storage (listings array)
+  listings.push(newListing);
+  console.log(listings);
+
+  // Render success confirmation page
+  res.render('create_success', { listing: newListing });
+});
+
+// Error handling for unhandled routes
+app.use((req, res) => {
+  res.status(404).render('create_fail', { message: 'Page not found!' });
+});
+
+app.post('/api/place_bid', (req, res) => {
+  const { bidder_name, bid_amount, comment, listing_id } = req.body;
+
+  // Validate that required fields are present
+  if (!bidder_name || !bid_amount || !listing_id) {
+    return res.status(400).json({ message: 'Missing required fields.' });
+  }
+
+  // Validate that the listing exists
+  const listing = listings.find(l => l.numericID === parseInt(listing_id));
+
+  if (!listing) {
+    return res.status(404).json({ message: 'Listing not found.' });
+  }
+
+  // Validate bid amount (you can adjust the validation logic as needed)
+  if (parseInt(bid_amount) < 1000) {
+    return res.status(400).json({ message: 'Bid amount must be at least $1000.' });
+  }
+
+  // Add the bid to the listing
+  listing.bids.push({
+    bidder: bidder_name,
+    bidAmount: parseInt(bid_amount),
+    comment: comment || 'No comment'
+  });
+
+  // Return the updated listing with the new bid
+  res.json({
+    message: 'Bid placed successfully!',
+    newBid: {
+      bidder_name,
+      bid_amount,
+      comment
+    },
+    listing: listing
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
