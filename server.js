@@ -43,6 +43,8 @@ const listings = [
 ];
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); 
+
 app.use('/resources', express.static('resources'));
 app.use("/js", express.static("resources/js/"))
 app.set("views", "templates");
@@ -102,12 +104,9 @@ app.get('/listing/:id', (req, res) => {
   if (!listing) {
     return res.status(404).render('404.pug'); // 404 page if listing is not found
   }
-
+  listing.bids.sort((a, b) => b.bidAmount - a.bidAmount);
   res.render('listing.pug', { listing: listing });
 });
-
-
-
 
 app.get("/create", (req, res) => {
   res.render("create.pug", (req, res))
@@ -118,7 +117,7 @@ app.post('/create', (req, res) => {
 
   // Basic validation
   if (!listingTitle || !imgInput || !textA || !carsCat || !date) {
-    return res.status(400).render('error', { message: 'All fields are required!' });
+    return res.status(400).render('create_fail');
   }
 
   // Create new listing
@@ -140,10 +139,6 @@ app.post('/create', (req, res) => {
   res.render('create_success', { listing: newListing });
 });
 
-// Error handling for unhandled routes
-app.use((req, res) => {
-  res.status(404).render('create_fail', { message: 'Page not found!' });
-});
 
 app.post('/api/place_bid', (req, res) => {
   const { bidder_name, bid_amount, comment, listing_id } = req.body;
@@ -182,6 +177,38 @@ app.post('/api/place_bid', (req, res) => {
     },
     listing: listing
   });
+
+  listing.bids.sort((a, b) => b.bidAmount - a.bidAmount);
+
+  res.render('listing', { listing: listing });
+
+});
+
+app.delete('/api/delete_listing', (req, res) => {
+  const { listing_id } = req.body; // Destructure listing_id from the request body
+
+  // Validate that the listing_id is provided
+  if (!listing_id) {
+    return res.status(400).json({ message: 'Missing listing_id' });
+  }
+
+  // Find the index of the listing to be deleted
+  const listingIndex = listings.findIndex(l => l.numericID === parseInt(listing_id));
+
+  // If the listing is not found
+  if (listingIndex === -1) {
+    return res.status(404).json({ message: 'Listing not found' });
+  }
+
+  // Remove the listing from the array
+  listings.splice(listingIndex, 1);
+
+  // Send back a success response
+  res.json({ message: 'Listing successfully deleted' });
+});
+
+app.all('*', (req, res) => {
+  res.status(404).render('404');
 });
 
 

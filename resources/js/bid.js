@@ -1,91 +1,98 @@
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("In bid.js script");
+window.addEventListener("DOMContentLoaded", () => {
+    console.log("In table.js script");
 
-  const btn = document.getElementById("btnButton");
-  const formInput = document.getElementById("bidInput");
-  const submitBtn = document.getElementById("submit");
-  const bidContainerID = document.getElementById("bidContainer");
+    let count = new Date("Oct 25, 2024 15:37:25").getTime();
+    let countTwo = new Date("Oct 30, 2024 15:37:25").getTime();
+    let countTre = new Date("Nov 15, 2024 15:37:25").getTime();
 
-  async function postapi() {
-    const name_input = document.getElementById("nameinput").value;
-    const amount_input = document.getElementById("amount").value;
-    const comments_input = document.getElementById("comments").value;
-    const listingId = document.getElementById("bidInput").getAttribute("data-id");
+    let x = setInterval(function () {
+        let now = new Date().getTime();
+        let distance = count - now;
+        let distwo = countTwo - now;
+        let distre = countTre - now;
 
-    const formData = {
-      bidder_name: name_input,
-      bid_amount: amount_input,
-      comment: comments_input,
-      listing_id: listingId
-    };
+        let d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        let h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        let s = Math.floor((distance % (1000 * 60)) / 1000);
 
-    console.log("fetch ", JSON.stringify(formData));
+        let dTwo = Math.floor(distwo / (1000 * 60 * 60 * 24));
+        let hTwo = Math.floor((distwo % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let mTwo = Math.floor((distwo % (1000 * 60 * 60)) / (1000 * 60));
+        let sTwo = Math.floor((distwo % (1000 * 60)) / 1000);
 
-    const url = '/api/place_bid';
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData),
-      });
+        let dTre = Math.floor(distre / (1000 * 60 * 60 * 24));
+        let hTre = Math.floor((distre % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let mTre = Math.floor((distre % (1000 * 60 * 60)) / (1000 * 60));
+        let sTre = Math.floor((distre % (1000 * 60)) / 1000);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error placing bid: ", errorData);
-        alert(errorData.message); // Display error message
-        return;
-      }
+        document.getElementById("timer1").innerHTML = d + "d " + h + "h "
+            + m + "m " + s + "s ";
+        document.getElementById("timer2").innerHTML = dTwo + "d " + hTwo + "h "
+            + mTwo + "m " + sTwo + "s ";
+        document.getElementById("timer3").innerHTML = dTre + "d " + hTre + "h "
+            + mTre + "m " + sTre + "s ";
 
-      const data = await response.json();
-      console.log('Bid placed successfully:', data);
+        if (distance < 0) {
+            clearInterval(x);
+            document.getElementById("timer1").innerHTML = "EXPIRED";
+            document.getElementById("timer2").innerHTML = "EXPIRED";
+            document.getElementById("timer3").innerHTML = "EXPIRED";
+        }
+    }, 1000);
 
-      // Add the new bid to the DOM dynamically
-      const newName = document.createTextNode(data.newBid.bidder_name);
-      const newBid = document.createTextNode("$" + data.newBid.bid_amount);
-      const newComment = document.createTextNode(data.newBid.comment);
+    // Hover effect for image previews
+    function setupImagePreview(imgDataId, previewId) {
+        document.getElementById(imgDataId).addEventListener('mouseover', function () {
+            const imgNode = document.createElement("img");
+            let imgData = document.getElementById(imgDataId);
+            const dataimage = imgData.dataset.image;
+            imgNode.src = dataimage;
+            imgNode.alt = "Image Preview here";
+            imgNode.width = 320;
+            imgNode.height = 270;
+            imgNode.id = "newNode";
+            const element = document.getElementById(previewId);
+            element.appendChild(imgNode);
+        });
 
-      const newDiv = document.createElement("div");
-      const newPname = document.createElement("p");
-      const newPamount = document.createElement("p");
-      const newPcomment = document.createElement("p");
-
-      newDiv.classList.add("bidDiv");
-
-      newPname.appendChild(newName);
-      newPamount.appendChild(newBid);
-      newPcomment.appendChild(newComment);
-
-      newDiv.appendChild(newPname).classList.add("top");
-      newDiv.appendChild(newPamount).classList.add("top");
-      newDiv.appendChild(newPcomment).classList.add("bot");
-
-      bidContainerID.prepend(newDiv); // Adds the new bid to the top of the list
-
-      // Optionally hide the form after submission
-      if (formInput.style.display === "block") {
-        formInput.style.display = "none";
-      } else {
-        formInput.style.display = "block";
-      }
-
-    } catch (error) {
-      console.error('Error placing bid:', error);
-      alert('Error placing bid. Please try again.');
+        document.getElementById(imgDataId).addEventListener("mouseout", () => {
+            const removeele = document.getElementById("newNode");
+            removeele.remove();
+        });
     }
-  }
+    setupImagePreview('imgData1', 'imgPreview');
+    setupImagePreview('imgData2', 'imgPreview');
+    setupImagePreview('imgData3', 'imgPreview');
 
-  formInput.style.display = "none";
+    // Delete Button functionality
+    const deleteButtons = document.querySelectorAll('.bidButton');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', async function () {
+            const listingId = this.getAttribute('data-id');
+            
+            try {
+                const response = await fetch('/api/delete_listing', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ listing_id: listingId }),
+                });
 
-  // Toggle the form visibility
-  btn.addEventListener("click", () => {
-    formInput.style.display = formInput.style.display === "block" ? "none" : "block";
-  });
+                if (response.ok) {
+                    const row = document.querySelector(`#tableRow-${listingId}`);
+                    if (row) {
+                        row.remove();
+                    }
+                } else {
 
-  // Handle form submission
-  submitBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    postapi();
-  });
+                    console.error('Failed to delete listing');
+                }
+            } catch (error) {
+
+                console.error('Error deleting listing:', error);
+            }
+        });
+    });
 });
