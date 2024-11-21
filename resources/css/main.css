@@ -32,9 +32,12 @@ img{
     max-height: 100vh;
 }
 
+@import url('https://fonts.googleapis.com/css?family=ExtraLight');
+
 #mainH1{
-    font-family: copperplate;
+    font-family: 'ExtraLight',sans-serif;
     text-align: center;
+    
 }
 #mainH2{
     text-align: center;
@@ -50,10 +53,13 @@ em{
 }
 .column{
     flex: 40%;
-    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-family: 'Courier New', Courier, monospace;
 }
 .column.des{
     background-color: rgb(152, 122, 83);
+    font-family: 'Courier New', Courier, monospace;
 }
 .main.content{
     text-align: center;
@@ -75,13 +81,17 @@ em{
 }
 .bidColumn{
     background-color: burlywood;
+    border-radius: 25px;
+    padding: 10px;
+
 }
 .bidDiv{
     background-color: gray;
-    padding: 2%;
-    border-radius: 4px;
+    padding: 5%;
+    margin: 5px;
+    border-radius: 25px;
     border-style: solid;
-    border-color: black;
+    border-color: white;
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -92,6 +102,12 @@ em{
 
 table{
     text-align: center;
+}
+table th{
+    background: burlywood;
+}
+table tr:nth-child(odd) {
+    background-color: burlywood;
 }
 .createBody{
     display: flex;
@@ -126,14 +142,9 @@ table{
     padding: 10%;
 }
 
-/* .sideOfTable img{
-    display: none;
-    width: 30%;
-    height: 40%;
-    float: right;
-    padding-right: 10;
-} */
+
 
 .listingh{
+    font-family: 'ExtraLight',sans-serif;
     text-align: center;
 }

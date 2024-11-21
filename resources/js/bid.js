@@ -1,98 +1,94 @@
-window.addEventListener("DOMContentLoaded", () => {
-    console.log("In table.js script");
-
-    let count = new Date("Oct 25, 2024 15:37:25").getTime();
-    let countTwo = new Date("Oct 30, 2024 15:37:25").getTime();
-    let countTre = new Date("Nov 15, 2024 15:37:25").getTime();
-
-    let x = setInterval(function () {
-        let now = new Date().getTime();
-        let distance = count - now;
-        let distwo = countTwo - now;
-        let distre = countTre - now;
-
-        let d = Math.floor(distance / (1000 * 60 * 60 * 24));
-        let h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        let s = Math.floor((distance % (1000 * 60)) / 1000);
-
-        let dTwo = Math.floor(distwo / (1000 * 60 * 60 * 24));
-        let hTwo = Math.floor((distwo % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let mTwo = Math.floor((distwo % (1000 * 60 * 60)) / (1000 * 60));
-        let sTwo = Math.floor((distwo % (1000 * 60)) / 1000);
-
-        let dTre = Math.floor(distre / (1000 * 60 * 60 * 24));
-        let hTre = Math.floor((distre % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let mTre = Math.floor((distre % (1000 * 60 * 60)) / (1000 * 60));
-        let sTre = Math.floor((distre % (1000 * 60)) / 1000);
-
-        document.getElementById("timer1").innerHTML = d + "d " + h + "h "
-            + m + "m " + s + "s ";
-        document.getElementById("timer2").innerHTML = dTwo + "d " + hTwo + "h "
-            + mTwo + "m " + sTwo + "s ";
-        document.getElementById("timer3").innerHTML = dTre + "d " + hTre + "h "
-            + mTre + "m " + sTre + "s ";
-
-        if (distance < 0) {
-            clearInterval(x);
-            document.getElementById("timer1").innerHTML = "EXPIRED";
-            document.getElementById("timer2").innerHTML = "EXPIRED";
-            document.getElementById("timer3").innerHTML = "EXPIRED";
-        }
-    }, 1000);
-
-    // Hover effect for image previews
-    function setupImagePreview(imgDataId, previewId) {
-        document.getElementById(imgDataId).addEventListener('mouseover', function () {
-            const imgNode = document.createElement("img");
-            let imgData = document.getElementById(imgDataId);
-            const dataimage = imgData.dataset.image;
-            imgNode.src = dataimage;
-            imgNode.alt = "Image Preview here";
-            imgNode.width = 320;
-            imgNode.height = 270;
-            imgNode.id = "newNode";
-            const element = document.getElementById(previewId);
-            element.appendChild(imgNode);
-        });
-
-        document.getElementById(imgDataId).addEventListener("mouseout", () => {
-            const removeele = document.getElementById("newNode");
-            removeele.remove();
-        });
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("In bid.js script");
+  
+    const btn = document.getElementById("btnButton");
+    const formInput = document.getElementById("bidInput");
+    const submitBtn = document.getElementById("submit");
+    const bidContainerID = document.getElementById("bidContainer");
+    const errorMessage = document.getElementById("error-message");
+    const highestBidAmount = parseInt(document.getElementById("amount").getAttribute("min"));  // You can dynamically set this from the template
+  
+    async function postapi() {
+      const name_input = document.getElementById("nameinput").value;
+      const amount_input = document.getElementById("amount").value;
+      const comments_input = document.getElementById("comments").value;
+      const listingId = document.getElementById("bidInput").getAttribute("data-id");
+  
+      const formData = {
+        bidder_name: name_input,
+        bid_amount: amount_input,
+        comment: comments_input,
+        listing_id: listingId
+      };
+  
+      // Validate that the bid is higher than the current highest bid
+      if (parseInt(amount_input) <= highestBidAmount) {
+        // Show the error message
+        errorMessage.style.display = 'block';
+        return;  // Stop form submission
+      } else {
+        // Hide the error message if the bid is valid
+        errorMessage.style.display = 'none';
+      }
+  
+      console.log("Before fetch ", JSON.stringify(formData));
+      const url = '/api/place_bid';
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (!response.ok) {
+        throw console.log(response.json()), new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log('Success:', data);
+  
+      const newName = document.createTextNode(name_input);
+      const newBid = document.createTextNode("$" + amount_input);
+      const newComment = document.createTextNode(comments_input);
+  
+      const newDiv = document.createElement("div");
+      const newPname = document.createElement("p");
+      const newPamount = document.createElement("p");
+      const newPcomment = document.createElement("p");
+  
+      newDiv.classList.add("bidDiv");
+  
+      newPname.appendChild(newName);
+      newPamount.appendChild(newBid);
+      newPcomment.appendChild(newComment);
+  
+      newDiv.appendChild(newPname).classList.add("top");
+      newDiv.appendChild(newPamount).classList.add("top");
+      newDiv.appendChild(newPcomment).classList.add("bot");
+  
+      bidContainerID.prepend(newDiv);
+  
+      if (formInput.style.display === "block") {
+        formInput.style.display = "none";
+      } else {
+        formInput.style.display = "block";
+      }
     }
-    setupImagePreview('imgData1', 'imgPreview');
-    setupImagePreview('imgData2', 'imgPreview');
-    setupImagePreview('imgData3', 'imgPreview');
-
-    // Delete Button functionality
-    const deleteButtons = document.querySelectorAll('.bidButton');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', async function () {
-            const listingId = this.getAttribute('data-id');
-            
-            try {
-                const response = await fetch('/api/delete_listing', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ listing_id: listingId }),
-                });
-
-                if (response.ok) {
-                    const row = document.querySelector(`#tableRow-${listingId}`);
-                    if (row) {
-                        row.remove();
-                    }
-                } else {
-
-                    console.error('Failed to delete listing');
-                }
-            } catch (error) {
-
-                console.error('Error deleting listing:', error);
-            }
-        });
+  
+    formInput.style.display = "none";
+  
+    btn.addEventListener("click", () => {
+      if (formInput.style.display === "block") {
+        formInput.style.display = "none";
+      } else {
+        formInput.style.display = "block";
+      }
     });
-});
+  
+    submitBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      postapi();
+    });
+  });
+  

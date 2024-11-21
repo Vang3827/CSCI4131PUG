@@ -4,6 +4,7 @@ window.addEventListener("DOMContentLoaded", () => {
     let count = new Date("Dec 25, 2024 15:37:25").getTime();
     let countTwo = new Date("Dec 30, 2024 15:37:25").getTime();
     let countTre = new Date("Dec 15, 2024 15:37:25").getTime();
+    let countFour = new Date("Dec 10, 2024 15:37:25").getTime();
 
     // Update the countdown every 1 second
     let x = setInterval(function () {
@@ -11,6 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
         let distance = count - now;
         let distwo = countTwo - now;
         let distre = countTre - now;
+        let disFour = countFour - now;
 
         let d = Math.floor(distance / (1000 * 60 * 60 * 24));
         let h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -27,18 +29,26 @@ window.addEventListener("DOMContentLoaded", () => {
         let mTre = Math.floor((distre % (1000 * 60 * 60)) / (1000 * 60));
         let sTre = Math.floor((distre % (1000 * 60)) / 1000);
 
+        let dFour = Math.floor(disFour / (1000 * 60 * 60 * 24));
+        let hFour = Math.floor((disFour % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let mFour = Math.floor((disFour % (1000 * 60 * 60)) / (1000 * 60));
+        let sFour = Math.floor((disFour % (1000 * 60)) / 1000);
+
         document.getElementById("timerid1").innerHTML = d + "d " + h + "h "
             + m + "m " + s + "s ";
         document.getElementById("timerid2").innerHTML = dTwo + "d " + hTwo + "h "
             + mTwo + "m " + sTwo + "s ";
         document.getElementById("timerid3").innerHTML = dTre + "d " + hTre + "h "
             + mTre + "m " + sTre + "s ";
+        document.getElementById("timerid4").innerHTML = dFour + "d " + hFour + "h "
+            + mFour + "m " + sFour + "s ";
 
         if (distance < 0) {
             clearInterval(x);
             document.getElementById("timerid1").innerHTML = "EXPIRED";
             document.getElementById("timerid2").innerHTML = "EXPIRED";
             document.getElementById("timerid3").innerHTML = "EXPIRED";
+            document.getElementById("timerid4").innerHTML = "EXPIRED";
         }
     }, 1000);
 
@@ -67,12 +77,14 @@ window.addEventListener("DOMContentLoaded", () => {
     setupImagePreview('imgData1', 'imgPreview');
     setupImagePreview('imgData2', 'imgPreview');
     setupImagePreview('imgData3', 'imgPreview');
+    setupImagePreview('imgData4', 'imgPreview');
 
     // Delete Button functionality
     const deleteButtons = document.querySelectorAll('.bidButton');
     deleteButtons.forEach(button => {
         button.addEventListener('click', async function () {
             const listingId = this.getAttribute('data-id');
+            console.log(listingId);
             
             try {
                 const response = await fetch('/api/delete_listing', {
