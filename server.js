@@ -94,7 +94,7 @@ app.get('/listing/:id', (req, res) => {
   const listing = listings.find(l => l.numericID === listingId);
 
   if (!listing) {
-    return res.status(404).render('404.pug'); // 404 page if listing is not found
+    return res.status(404).render('404.pug');
   }
   listing.bids.sort((a, b) => b.bidAmount - a.bidAmount);
   res.render('listing.pug', { listing: listing });
@@ -107,27 +107,27 @@ app.get("/create", (req, res) => {
 app.post('/create', (req, res) => {
   const { listingTitle, imgInput, textA, carsCat, date } = req.body;
 
-  // Basic validation
+
   if (!listingTitle || !imgInput || !textA || !carsCat || !date) {
     return res.status(400).render('create_fail');
   }
 
-  // Create new listing
+
   const newListing = {
     vehicle: listingTitle,
     url: imgInput,
     description: textA,
     category: carsCat,
-    numericID: listings.length + 1,  // Increment the numericID
+    numericID: listings.length + 1, 
     date: date,
     bids: []
   };
 
-  // Add new listing to internal storage (listings array)
+ 
   listings.push(newListing);
   console.log(listings);
 
-  // Render success confirmation page
+
   res.render('create_success', { listing: newListing });
 });
 
@@ -135,31 +135,30 @@ app.post('/create', (req, res) => {
 app.post('/api/place_bid', (req, res) => {
   const { bidder_name, bid_amount, comment, listing_id } = req.body;
 
-  // Validate that required fields are present
+
   if (!bidder_name || !bid_amount || !listing_id) {
     return res.status(400).json({ message: 'Missing required fields.' });
   }
 
-  // Validate that the listing exists
+ 
   const listing = listings.find(l => l.numericID === parseInt(listing_id));
 
   if (!listing) {
     return res.status(404).json({ message: 'Listing not found.' });
   }
 
-  // Validate bid amount (you can adjust the validation logic as needed)
+
   if (parseInt(bid_amount) < 1000) {
     return res.status(400).json({ message: 'Bid amount must be at least $1000.' });
   }
 
-  // Add the bid to the listing
+
   listing.bids.push({
     bidder: bidder_name,
     bidAmount: parseInt(bid_amount),
     comment: comment || 'No comment'
   });
 
-  // Return the updated listing with the new bid
   res.json({
     message: 'Bid placed successfully!',
     newBid: {
@@ -183,17 +182,17 @@ app.delete('/api/delete_listing', (req, res) => {
 
   if (!listing_id) {
       console.log('Missing listing_id');
-      return res.status(400).json({ message: 'Missing listing_id' }); // Make sure to return here
+      return res.status(400).json({ message: 'Missing listing_id' }); 
   }
 
   const listingIndex = listings.findIndex(l => l.numericID === parseInt(listing_id));
 
   if (listingIndex === -1) {
       console.log(`Listing with ID ${listing_id} not found`);
-      return res.status(404).json({ message: 'Listing not found' }); // Make sure to return here as well
+      return res.status(404).json({ message: 'Listing not found' });
   }
 
-  // Delete listing and send success response
+
   listings.splice(listingIndex, 1);
   console.log(`Listing with ID ${listing_id} deleted`);
   res.json({ message: 'Listing successfully deleted' });

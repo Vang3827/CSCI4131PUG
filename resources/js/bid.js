@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitBtn = document.getElementById("submit");
     const bidContainerID = document.getElementById("bidContainer");
     const errorMessage = document.getElementById("error-message");
-    const highestBidAmount = parseInt(document.getElementById("amount").getAttribute("min"));  // You can dynamically set this from the template
+    const highestBidAmount = parseInt(document.getElementById("amount").getAttribute("min"));
   
     async function postapi() {
       const name_input = document.getElementById("nameinput").value;
@@ -21,13 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
         listing_id: listingId
       };
   
-      // Validate that the bid is higher than the current highest bid
       if (parseInt(amount_input) <= highestBidAmount) {
-        // Show the error message
+
         errorMessage.style.display = 'block';
-        return;  // Stop form submission
+        return;
       } else {
-        // Hide the error message if the bid is valid
+
         errorMessage.style.display = 'none';
       }
   

@@ -6,7 +6,6 @@ window.addEventListener("DOMContentLoaded", () => {
     let countTre = new Date("Dec 15, 2024 15:37:25").getTime();
     let countFour = new Date("Dec 10, 2024 15:37:25").getTime();
 
-    // Update the countdown every 1 second
     let x = setInterval(function () {
         let now = new Date().getTime();
         let distance = count - now;
@@ -52,7 +51,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     }, 1000);
 
-    // Hover effect for image previews
+
     function setupImagePreview(imgDataId, previewId) {
         document.getElementById(imgDataId).addEventListener('mouseover', function () {
             const imgNode = document.createElement("img");
@@ -73,13 +72,11 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Setting up image previews for multiple images
     setupImagePreview('imgData1', 'imgPreview');
     setupImagePreview('imgData2', 'imgPreview');
     setupImagePreview('imgData3', 'imgPreview');
     setupImagePreview('imgData4', 'imgPreview');
 
-    // Delete Button functionality
     const deleteButtons = document.querySelectorAll('.bidButton');
     deleteButtons.forEach(button => {
         button.addEventListener('click', async function () {
@@ -96,15 +93,14 @@ window.addEventListener("DOMContentLoaded", () => {
                 });
 
                 if (response.ok) {
-                    // Immediately remove the listing row from the DOM without refreshing
+
                     const row = document.querySelector(`#tableRow-${listingId}`);
-                    if (row) row.remove();  // Remove the row from the table
+                    if (row) row.remove();
                 } else {
-                    // Handle failure here (you can add an error message, log it, etc.)
+
                     console.error('Failed to delete listing');
                 }
             } catch (error) {
-                // Handle any errors
                 console.error('Error deleting listing:', error);
             }
         });
