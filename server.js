@@ -55,23 +55,69 @@ const listings = [
   }
 ];
 
+
+let rateLimitStore = [];
+const RATE_LIMIT = 4; 
+const RATE_LIMIT_WINDOW = 10;
+
+const checkRateLimit = () => {
+  const now = new Date();
+  rateLimitStore = rateLimitStore.filter(time =>
+    (now - time) <= RATE_LIMIT_WINDOW * 1000
+  );
+
+  if (rateLimitStore.length >= RATE_LIMIT) {
+    const oldestRequest = rateLimitStore[0];
+    const retryAfter = RATE_LIMIT_WINDOW - ((now - oldestRequest) / 1000);
+    return { passed: false, retryAfter };
+  }
+
+  rateLimitStore.push(now);
+  return { passed: true };
+};
+
+
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); 
+app.use(express.json());
 
 app.use('/css', express.static('resources/css'));
-app.use("/js", express.static("resources/js/"))
+app.use("/js", express.static("resources/js/"));
 app.set("views", "templates");
 app.set("view engine", "pug");
 
-const port = 4131
+const port = 4131;
+
+
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  res.send = function (body) {
+    const statusCode = res.statusCode;
+    console.log(`${req.method} ${req.originalUrl} ${statusCode} Listings: ${listings.length}`);
+    originalSend.call(this, body);
+  };
+  next();
+});
+
+app.use('/api/', (req, res, next) => {
+  const { passed, retryAfter } = checkRateLimit();
+
+  if (!passed) {
+    res.setHeader('Retry-After', retryAfter);
+    return res.status(429).json({
+      message: `Rate limit exceeded. Try again in ${retryAfter.toFixed(2)} seconds.`
+    });
+  }
+  
+  next();
+});
 
 app.get("/", (req, res) => {
-  res.render("main.pug")
-})
+  res.render("main.pug");
+});
 
 app.get("/main", (req, res) => {
-  res.render("main.pug")
-})
+  res.render("main.pug");
+});
 
 app.get("/gallery", (req, res) => {
   const queryTerm = req.query.query || ''; 
@@ -88,7 +134,6 @@ app.get("/gallery", (req, res) => {
   res.render('gallery', { tempListing });
 });
 
-
 app.get('/listing/:id', (req, res) => {
   const listingId = parseInt(req.params.id);
   const listing = listings.find(l => l.numericID === listingId);
@@ -96,68 +141,70 @@ app.get('/listing/:id', (req, res) => {
   if (!listing) {
     return res.status(404).render('404.pug');
   }
+
+  const bidder_name = req.cookies?.bidder_name || '';
   listing.bids.sort((a, b) => b.bidAmount - a.bidAmount);
-  res.render('listing.pug', { listing: listing });
+
+  res.render('listing.pug', { listing, bidder_name });
 });
 
 app.get("/create", (req, res) => {
-  res.render("create.pug", (req, res))
-})
+  res.render("create.pug");
+});
 
 app.post('/create', (req, res) => {
   const { listingTitle, imgInput, textA, carsCat, date } = req.body;
 
-
   if (!listingTitle || !imgInput || !textA || !carsCat || !date) {
     return res.status(400).render('create_fail');
   }
-
 
   const newListing = {
     vehicle: listingTitle,
     url: imgInput,
     description: textA,
     category: carsCat,
-    numericID: listings.length + 1, 
+    numericID: listings.length + 1,
     date: date,
     bids: []
   };
 
- 
   listings.push(newListing);
   console.log(listings);
-
 
   res.render('create_success', { listing: newListing });
 });
 
-
 app.post('/api/place_bid', (req, res) => {
-  const { bidder_name, bid_amount, comment, listing_id } = req.body;
+  const { bid_amount, comment, listing_id } = req.body;
+  const bidder_name_from_cookie = req.cookies?.bidder_name;
+  let { bidder_name } = req.body;
 
+  if (bidder_name_from_cookie) {
+    bidder_name = bidder_name_from_cookie;
+  }
 
   if (!bidder_name || !bid_amount || !listing_id) {
     return res.status(400).json({ message: 'Missing required fields.' });
   }
 
- 
   const listing = listings.find(l => l.numericID === parseInt(listing_id));
 
   if (!listing) {
     return res.status(404).json({ message: 'Listing not found.' });
   }
 
-
   if (parseInt(bid_amount) < 1000) {
     return res.status(400).json({ message: 'Bid amount must be at least $1000.' });
   }
-
 
   listing.bids.push({
     bidder: bidder_name,
     bidAmount: parseInt(bid_amount),
     comment: comment || 'No comment'
   });
+
+  res.cookie('bidder_name', bidder_name, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 });
 
   res.json({
     message: 'Bid placed successfully!',
@@ -166,45 +213,31 @@ app.post('/api/place_bid', (req, res) => {
       bid_amount,
       comment
     },
-    listing: listing
+    listing
   });
-
-  listing.bids.sort((a, b) => b.bidAmount - a.bidAmount);
-
-  res.render('listing', { listing: listing });
-
 });
 
 app.delete('/api/delete_listing', (req, res) => {
-  console.log('Received request to delete:', req.body);
-
   const { listing_id } = req.body;
 
   if (!listing_id) {
-      console.log('Missing listing_id');
-      return res.status(400).json({ message: 'Missing listing_id' }); 
+    return res.status(400).json({ message: 'Missing listing_id' });
   }
 
-  const listingIndex = listings.findIndex(l => l.numericID === parseInt(listing_id));
+  const listingIndex = listings.findIndex((l) => l.numericID === parseInt(listing_id));
 
   if (listingIndex === -1) {
-      console.log(`Listing with ID ${listing_id} not found`);
-      return res.status(404).json({ message: 'Listing not found' });
+    return res.status(404).json({ message: 'Listing not found' });
   }
 
-
   listings.splice(listingIndex, 1);
-  console.log(`Listing with ID ${listing_id} deleted`);
   res.json({ message: 'Listing successfully deleted' });
 });
-
-
 
 app.all('*', (req, res) => {
   res.status(404).render('404');
 });
 
-
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
